@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/security
+    http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <!--取消拦截的url地址-->
+    <security:http pattern="/login.html" security="none" />
+    <security:http pattern="/failed.html" security="none" />
+
+    <!--
+       auto-config:这个是一个自动配置过滤器(Filter)的属性
+       use-expressions:"是否使用spel表达式"，如果使用表达式：hasRole('ROLE_USER')
+   -->
+    <security:http auto-config="true" use-expressions="false">
+        <!-- 配置拦截的请求地址，任何请求地址都必须有ROLE_USER的权限 -->
+        <security:intercept-url pattern="/**" access="ROLE_USER" />
+
+        <!--
+            登录页面配置
+            login-page:登录页面
+            login-processing-url:处理登录的地址
+            default-target-url:登录成功后默认跳转地址
+            authentication-failure-url:登录失败跳转地址
+         -->
+        <security:form-login
+            login-page="/login.html"
+            login-processing-url="/login"
+            default-target-url="/success.html"
+            authentication-failure-url="/failed.html"
+        />
+
+        <!--关闭跨越安全请求-->
+        <security:csrf disabled="true"/>
+
+        <!--
+            退出配置
+            logout-success-url:退出后跳转地址
+            invalidate-session:让当前session失效
+
+        -->
+
+        <security:logout
+            logout-success-url="/login.html"
+            invalidate-session="true"
+            logout-url="/logout"
+        />
+
+    </security:http>
+
+    <!--配置授权信息-->
+    <security:authentication-manager>
+        <security:authentication-provider>
+            <security:user-service>
+                <!--
+                    配置账号密码，以及该账号的角色信息
+                    其中{noop}表示加密的类型,noop则表示不使用任何加密方式
+                    PasswordEncoderFactories中有所体现
+                -->
+                <security:user name="admin" password="admin" authorities="ROLE_USER" />
+            </security:user-service>
+        </security:authentication-provider>
+    </security:authentication-manager>
+</beans>
